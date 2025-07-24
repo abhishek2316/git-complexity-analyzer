@@ -11,6 +11,11 @@ import java.util.List;
 @Repository
 public interface UrlSearchLogRepository extends JpaRepository<UrlSearchLog, Long> {
 
+//    List<UrlSearchLog> findByCreatedAtAfter(LocalDateTime startDate);
+
+    List<UrlSearchLog> findBySearchTimestampAfter(LocalDateTime startDate);
+
+
     // Existing methods...
     List<UrlSearchLog> findByExtractedUsernameOrderBySearchTimestampDesc(String username);
     List<UrlSearchLog> findBySearchTimestampAfterOrderBySearchTimestampDesc(LocalDateTime after);

@@ -4,16 +4,24 @@ import com.gitanalyzer.dto.ApiResponseDto;
 import com.gitanalyzer.dto.GitHubApiResponse;
 import com.gitanalyzer.dto.RepoAnalyticsDto;
 import com.gitanalyzer.dto.UserAnalyticsDto;
+import com.gitanalyzer.model.Commit;
+import com.gitanalyzer.model.Contributor;
+import com.gitanalyzer.model.Repository;
 import com.gitanalyzer.repository.*;
 import com.gitanalyzer.service.GitHubApiService;
+import com.gitanalyzer.service.RepoAnalyticsService;
 import com.gitanalyzer.service.UserAnalyticsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/test")
 @CrossOrigin(origins = "*")
@@ -21,6 +29,9 @@ public class TestController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RepoAnalyticsService repoAnalyticsService;
 
     @Autowired
     private UserAnalyticsService userAnalyticsService;
@@ -494,6 +505,324 @@ public class TestController {
             );
             response.setProcessingTimeMs(processingTime);
             return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @GetMapping("/repo-analytics/{owner}/{repoName}")
+    public ResponseEntity<?> testGetRepositoryAnalytics(
+            @PathVariable String owner,
+            @PathVariable String repoName) {
+        try {
+//            log.info("Testing repository analytics for: {}/{}", owner, repoName);
+
+            Optional<RepoAnalyticsDto> analytics = repoAnalyticsService.getRepositoryAnalytics(owner, repoName);
+
+            if (analytics.isPresent()) {
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "Repository analytics retrieved successfully",
+                        "data", analytics.get()
+                ));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+//            log.error("Error testing repository analytics: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/repo-analytics/{owner}/{repoName}/refresh")
+    public ResponseEntity<?> testRefreshRepositoryAnalytics(
+            @PathVariable String owner,
+            @PathVariable String repoName) {
+        try {
+//            log.info("Testing refresh repository analytics for: {}/{}", owner, repoName);
+
+            Optional<RepoAnalyticsDto> analytics = repoAnalyticsService.refreshRepositoryAnalytics(owner, repoName);
+
+            if (analytics.isPresent()) {
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "Repository analytics refreshed successfully",
+                        "data", analytics.get()
+                ));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+//            log.error("Error refreshing repository analytics: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+//    @GetMapping("/repositories/user/{username}")
+//    public ResponseEntity<?> testGetRepositoriesByUser(@PathVariable String username) {
+//        try {
+////            log.info("Testing get repositories for user: {}", username);
+//
+//            List<Repository> repositories = repoAnalyticsService.getRepositoriesByUser(username);
+//
+//            return ResponseEntity.ok(Map.of(
+//                    "success", true,
+//                    "message", "Repositories retrieved successfully",
+//                    "count", repositories.size(),
+//                    "data", repositories
+//            ));
+//        } catch (Exception e) {
+////            log.error("Error getting repositories for user: {}", e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("success", false, "error", e.getMessage()));
+//        }
+//    }
+
+    @GetMapping("/repositories/trending")
+    public ResponseEntity<?> testGetTrendingRepositories(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "5") int minStars) {
+        try {
+//            log.info("Testing get trending repositories: days={}, minStars={}", days, minStars);
+
+            List<Repository> repositories = repoAnalyticsService.getTrendingRepositories(days, minStars);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Trending repositories retrieved successfully",
+                    "count", repositories.size(),
+                    "filters", Map.of("days", days, "minStars", minStars),
+                    "data", repositories
+            ));
+        } catch (Exception e) {
+//            log.error("Error getting trending repositories: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/repository/{repoId}/commits")
+    public ResponseEntity<?> testGetRepositoryCommits(@PathVariable Long repoId) {
+        try {
+//            log.info("Testing get commits for repository ID: {}", repoId);
+
+            List<Commit> commits = commitRepository.findByRepositoryIdOrderByAuthorDateDesc(repoId);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repository commits retrieved successfully",
+                    "repositoryId", repoId,
+                    "count", commits.size(),
+                    "data", commits
+            ));
+        } catch (Exception e) {
+//            log.error("Error getting repository commits: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/repository/{repoId}/contributors")
+    public ResponseEntity<?> testGetRepositoryContributors(@PathVariable Long repoId) {
+        try {
+//            log.info("Testing get contributors for repository ID: {}", repoId);
+
+            List<Contributor> contributors = contributorRepository.findByRepositoryIdOrderByContributionCountDesc(repoId);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repository contributors retrieved successfully",
+                    "repositoryId", repoId,
+                    "count", contributors.size(),
+                    "data", contributors
+            ));
+        } catch (Exception e) {
+//            log.error("Error getting repository contributors: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/repository/{repoId}/stats")
+    public ResponseEntity<?> testGetRepositoryStats(@PathVariable Long repoId) {
+        try {
+//            log.info("Testing get repository statistics for ID: {}", repoId);
+
+            // Get commit stats
+            Object[] commitStats = commitRepository.getRepositoryCommitStats(repoId);
+
+            // Get contributor stats
+            Object[] contributorStats = contributorRepository.getRepositoryContributorStats(repoId);
+
+            // Get repository details
+            Optional<Repository> repository = repositoryRepository.findById(repoId);
+
+            Map<String, Object> stats = new HashMap<>();
+
+            if (commitStats != null && commitStats.length >= 4) {
+                stats.put("commitStats", Map.of(
+                        "totalCommits", commitStats[0] != null ? commitStats[0] : 0,
+                        "totalAdditions", commitStats[1] != null ? commitStats[1] : 0,
+                        "totalDeletions", commitStats[2] != null ? commitStats[2] : 0,
+                        "totalChangedFiles", commitStats[3] != null ? commitStats[3] : 0
+                ));
+            }
+
+            if (contributorStats != null && contributorStats.length >= 3) {
+                stats.put("contributorStats", Map.of(
+                        "totalContributors", contributorStats[0] != null ? contributorStats[0] : 0,
+                        "averageContributions", contributorStats[1] != null ? contributorStats[1] : 0,
+                        "totalContributions", contributorStats[2] != null ? contributorStats[2] : 0
+                ));
+            }
+
+            if (repository.isPresent()) {
+                stats.put("repositoryInfo", repository.get());
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repository statistics retrieved successfully",
+                    "repositoryId", repoId,
+                    "data", stats
+            ));
+        } catch (Exception e) {
+//            log.error("Error getting repository statistics: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/github/repository/{owner}/{repoName}")
+    public ResponseEntity<?> testGitHubRepositoryFetch(
+            @PathVariable String owner,
+            @PathVariable String repoName) {
+        try {
+            log.info("Testing GitHub API repository fetch: {}/{}", owner, repoName);
+
+            Optional<GitHubApiResponse.GitHubRepository> githubRepo =
+                    gitHubApiService.getRepository(owner, repoName);
+
+            if (githubRepo.isPresent()) {
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "GitHub repository data fetched successfully",
+                        "data", githubRepo.get()
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("success", false, "message", "Repository not found on GitHub"));
+            }
+        } catch (Exception e) {
+            log.error("Error fetching GitHub repository: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/github/commits/{owner}/{repoName}")
+    public ResponseEntity<?> testGitHubCommitsFetch(
+            @PathVariable String owner,
+            @PathVariable String repoName,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int perPage) {
+        try {
+            log.info("Testing GitHub API commits fetch: {}/{} (page: {}, perPage: {})",
+                    owner, repoName, page, perPage);
+
+            List<GitHubApiResponse.GitHubCommit> commits =
+                    gitHubApiService.getRepositoryCommits(owner, repoName, page, perPage);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "GitHub commits data fetched successfully",
+                    "count", commits.size(),
+                    "pagination", Map.of("page", page, "perPage", perPage),
+                    "data", commits
+            ));
+        } catch (Exception e) {
+            log.error("Error fetching GitHub commits: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/github/contributors/{owner}/{repoName}")
+    public ResponseEntity<?> testGitHubContributorsFetch(
+            @PathVariable String owner,
+            @PathVariable String repoName) {
+        try {
+            log.info("Testing GitHub API contributors fetch: {}/{}", owner, repoName);
+
+            List<GitHubApiResponse.GitHubContributor> contributors =
+                    gitHubApiService.getRepositoryContributors(owner, repoName);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "GitHub contributors data fetched successfully",
+                    "count", contributors.size(),
+                    "data", contributors
+            ));
+        } catch (Exception e) {
+            log.error("Error fetching GitHub contributors: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/repository/{repoId}/activity-timeline")
+    public ResponseEntity<?> testGetRepositoryActivityTimeline(@PathVariable Long repoId) {
+        try {
+            log.info("Testing get repository activity timeline for ID: {}", repoId);
+
+            LocalDateTime since = LocalDateTime.now().minusDays(30);
+            List<Object[]> commitActivity = commitRepository.getCommitActivityByDate(repoId, since);
+
+            List<Map<String, Object>> timeline = commitActivity.stream()
+                    .map(row -> Map.of(
+                            "date", row[0].toString(),
+                            "commits", row[1]
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repository activity timeline retrieved successfully",
+                    "repositoryId", repoId,
+                    "period", "Last 30 days",
+                    "data", timeline
+            ));
+        } catch (Exception e) {
+            log.error("Error getting repository activity timeline: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/repository/{repoId}/top-contributors")
+    public ResponseEntity<?> testGetTopContributors(@PathVariable Long repoId) {
+        try {
+            log.info("Testing get top contributors for repository ID: {}", repoId);
+
+            List<Object[]> topContributors = commitRepository.getMostActiveContributors(repoId);
+
+            List<Map<String, Object>> contributors = topContributors.stream()
+                    .map(row -> Map.of(
+                            "authorName", row[0],
+                            "commitCount", row[1]
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Top contributors retrieved successfully",
+                    "repositoryId", repoId,
+                    "data", contributors
+            ));
+        } catch (Exception e) {
+            log.error("Error getting top contributors: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 

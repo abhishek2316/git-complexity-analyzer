@@ -84,6 +84,9 @@ public class UserAnalyticsService {
 
             // Convert and save
             User user = gitHubApiService.convertToUserEntity(githubUser.get());
+            if (existingUser.isPresent()) {
+                user.setId(existingUser.get().getId()); // 🔑 Set ID to trigger update instead of insert
+            }
             user = userRepository.save(user);
 
             // Fetch and save repositories
@@ -441,5 +444,21 @@ public class UserAnalyticsService {
             log.error("Error refreshing analytics for user {}: {}", username, e.getMessage());
             return Optional.empty();
         }
+    }
+
+    /**
+     * Compare multiple users
+     */
+    public Map<String, UserAnalyticsDto> compareUsers(List<String> usernames) {
+        Map<String, UserAnalyticsDto> comparisons = new HashMap<>();
+
+        for (String username : usernames) {
+            Optional<UserAnalyticsDto> analytics = getUserAnalytics(username);
+            if (analytics.isPresent()) {
+                comparisons.put(username, analytics.get());
+            }
+        }
+
+        return comparisons;
     }
 }

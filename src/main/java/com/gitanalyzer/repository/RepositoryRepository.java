@@ -1,6 +1,8 @@
 package com.gitanalyzer.repository;
 
 import com.gitanalyzer.model.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,10 @@ import java.util.Optional;
 public interface RepositoryRepository extends JpaRepository<Repository, Long> {
 
     // Find repositories by user
+//    List<Repository> findByUserGithubUsernameOrderByStarsCountDesc(String githubUsername);
+
+    Page<Repository> findByUserGithubUsernameOrderByStarsCountDesc(String githubUsername, Pageable pageable);
+
     List<Repository> findByUserGithubUsernameOrderByStarsCountDesc(String githubUsername);
 
     // Find repository by user and repo name
