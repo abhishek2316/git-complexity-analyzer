@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Analytics - Results</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/charts.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <!-- Header (same as index.html) -->
+    <header class="header">
+        <div class="logo">
+            <i class="fab fa-github"></i>
+            <h1>GitHub Analytics</h1>
+        </div>
+        <nav class="nav">
+            <a href="/">Search</a>
+            <a href="#" class="active">Analytics</a>
+            <a href="/about">About</a>
+        </nav>
+    </header>
+
+    <!-- Analytics Content -->
+    <main class="analytics-main">
+        <!-- Loading State -->
+        <div id="analyticsLoading" class="loading-section">
+            <div class="spinner"></div>
+            <p>Processing analytics data...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="analyticsError" class="error-section hidden">
+            <div class="error-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>No Data Available</h3>
+                <p id="errorText">Unable to load analytics data.</p>
+                <a href="/" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Search
+                </a>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="analyticsResults" class="analytics-container hidden">
+            <!-- Header Info -->
+            <section class="analytics-header">
+                <div class="header-info">
+                    <div class="avatar-section">
+                        <img id="avatarImg" src="" alt="Avatar" class="avatar">
+                    </div>
+                    <div class="info-section">
+                        <h1 id="entityName"></h1>
+                        <p id="entityDescription"></p>
+                        <div class="meta-info">
+                            <span id="createdDate"></span>
+                            <span id="lastUpdated"></span>
+                        </div>
+                    </div>
+                    <div class="action-section">
+                        <a id="githubLink" href="" target="_blank" class="github-btn">
+                            <i class="fab fa-github"></i>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Metrics Cards -->
+            <section class="metrics-section">
+                <div class="metrics-grid" id="metricsGrid">
+                    <!-- Dynamic metric cards will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="charts-grid">
+                    <!-- Language Distribution Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Language Distribution</h3>
+                            <div class="chart-controls">
+                                <button class="chart-toggle active" data-chart="pie">Pie Chart</button>
+                                <button class="chart-toggle" data-chart="bar">Bar Chart</button>
+                            </div>
+                        </div>
+                        <div id="languageChart" class="chart"></div>
+                    </div>
+
+                    <!-- Commit Activity Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Commit Activity (Last 12 Months)</h3>
+                        </div>
+                        <div id="commitChart" class="chart"></div>
+                    </div>
+
+                    <!-- Contributors Chart (for repositories) -->
+                    <div class="chart-container" id="contributorsContainer">
+                        <div class="chart-header">
+                            <h3>Top Contributors</h3>
+                        </div>
+                        <div id="contributorsChart" class="chart"></div>
+                    </div>
+
+                    <!-- Repository Stats (for users) -->
+                    <div class="chart-container" id="repoStatsContainer">
+                        <div class="chart-header">
+                            <h3>Repository Statistics</h3>
+                        </div>
+                        <div id="repoStatsChart" class="chart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Tables Section -->
+            <section class="tables-section">
+                <div class="tables-grid">
+                    <!-- Repositories Table (for users) -->
+                    <div class="table-container" id="repositoriesTable">
+                        <h3>Popular Repositories</h3>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead id="repoTableHead"></thead>
+                                <tbody id="repoTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Languages Table -->
+                    <div class="table-container" id="languagesTable">
+                        <h3>Language Breakdown</h3>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead id="langTableHead"></thead>
+                                <tbody id="langTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="lib/d3.v7.min.js"></script>
+<script src="js/d3-charts.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>

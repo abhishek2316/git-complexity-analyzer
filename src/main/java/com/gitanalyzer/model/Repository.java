@@ -8,7 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Formula;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -80,6 +84,19 @@ public class Repository {
     @OneToMany(mappedBy = "repository", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Contributor> contributors;
+
+//    @OneToMany(mappedBy = "repository", fetch = FetchType.LAZY)
+//    @BatchSize(size = 10) // Reduces N+1 queries
+//    private List<Commit> commits = new ArrayList<>();
+//
+//    // Add a computed field to avoid counting queries
+//    @Formula("(SELECT COUNT(*) FROM commits c WHERE c.repository_id = id)")
+//    private Long commitCount;
+//
+//    // Getters and setters
+//    public Long getCommitCount() {
+//        return commitCount;
+//    }
 
     // Custom constructor for API data
     public Repository(User user, String repoName, String fullName, String language) {

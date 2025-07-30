@@ -3,12 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Analyzer - Home</title>
-
+    <title>GitHub Analytics - Search</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-<div>
-    <h1>Hey Abhishek!</h1>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fab fa-github"></i>
+            <h1>GitHub Analytics</h1>
+        </div>
+        <nav class="nav">
+            <a href="/" class="active">Search</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/about">About</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Analyze GitHub Users & Repositories</h2>
+            <p>Get comprehensive analytics and insights for any GitHub user or repository</p>
+        </section>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <!-- Search Type Toggle -->
+                <div class="search-toggle">
+                    <button id="userSearchBtn" class="toggle-btn active" data-type="user">
+                        <i class="fas fa-user"></i>
+                        User Analytics
+                    </button>
+                    <button id="repoSearchBtn" class="toggle-btn" data-type="repository">
+                        <i class="fas fa-code-branch"></i>
+                        Repository Analytics
+                    </button>
+                </div>
+
+                <!-- User Search Form -->
+                <div id="userSearchForm" class="search-form active">
+                    <div class="form-group">
+                        <label for="username">GitHub Username</label>
+                        <div class="input-group">
+                            <i class="fab fa-github input-icon"></i>
+                            <input
+                                    type="text"
+                                    id="username"
+                                    placeholder="e.g., torvalds, octocat"
+                                    autocomplete="off"
+                            >
+                            <button type="button" id="userSearchSubmit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                Analyze User
+                            </button>
+                        </div>
+                        <div class="input-help">
+                            Enter a GitHub username to get comprehensive user analytics
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repository Search Form -->
+                <div id="repoSearchForm" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="repoOwner">Repository Owner</label>
+                            <div class="input-group">
+                                <i class="fas fa-user input-icon"></i>
+                                <input
+                                        type="text"
+                                        id="repoOwner"
+                                        placeholder="e.g., microsoft"
+                                        autocomplete="off"
+                                >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="repoName">Repository Name</label>
+                            <div class="input-group">
+                                <i class="fas fa-code-branch input-icon"></i>
+                                <input
+                                        type="text"
+                                        id="repoName"
+                                        placeholder="e.g., vscode"
+                                        autocomplete="off"
+                                >
+                                <button type="button" id="repoSearchSubmit" class="search-btn">
+                                    <i class="fas fa-search"></i>
+                                    Analyze Repository
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-help">
+                        Enter owner and repository name to get detailed repository analytics
+                    </div>
+                </div>
+
+                <!-- URL Input Alternative -->
+                <div class="url-input-section">
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="githubUrl">GitHub URL</label>
+                        <div class="input-group">
+                            <i class="fas fa-link input-icon"></i>
+                            <input
+                                    type="url"
+                                    id="githubUrl"
+                                    placeholder="Paste GitHub URL here (user or repository)"
+                                    autocomplete="off"
+                            >
+                            <button type="button" id="urlSearchSubmit" class="search-btn">
+                                <i class="fas fa-external-link-alt"></i>
+                                Analyze URL
+                            </button>
+                        </div>
+                        <div class="input-help">
+                            Supports: https://github.com/username or https://github.com/owner/repository
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p id="loadingText">Fetching data from GitHub...</p>
+                <div class="loading-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <small id="progressText">Initializing...</small>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="errorDisplay" class="error-display hidden">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error</h3>
+                    <p id="errorMessage"></p>
+                    <button id="errorRetry" class="retry-btn">Try Again</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Search Examples -->
+        <section class="examples-section">
+            <h3>Try These Examples</h3>
+            <div class="examples-grid">
+                <div class="example-card" data-type="user" data-value="torvalds">
+                    <div class="example-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="example-content">
+                        <h4>Linus Torvalds</h4>
+                        <p>Creator of Linux</p>
+                        <span class="example-type">User Analytics</span>
+                    </div>
+                </div>
+                <div class="example-card" data-type="repository" data-owner="microsoft" data-repo="vscode">
+                    <div class="example-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="example-content">
+                        <h4>VS Code</h4>
+                        <p>microsoft/vscode</p>
+                        <span class="example-type">Repository Analytics</span>
+                    </div>
+                </div>
+                <div class="example-card" data-type="user" data-value="octocat">
+                    <div class="example-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="example-content">
+                        <h4>Octocat</h4>
+                        <p>GitHub's mascot</p>
+                        <span class="example-type">User Analytics</span>
+                    </div>
+                </div>
+                <div class="example-card" data-type="repository" data-owner="facebook" data-repo="react">
+                    <div class="example-icon">
+                        <i class="fab fa-react"></i>
+                    </div>
+                    <div class="example-content">
+                        <h4>React</h4>
+                        <p>facebook/react</p>
+                        <span class="example-type">Repository Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <h3>What You'll Get</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Comprehensive Analytics</h4>
+                    <p>Detailed statistics about repositories, commits, contributions, and activity patterns</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Contributor Insights</h4>
+                    <p>Analyze contributor activity, top contributors, and collaboration patterns</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h4>Language Statistics</h4>
+                    <p>Programming language distribution and usage patterns across repositories</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h4>Visual Charts</h4>
+                    <p>Interactive charts and graphs to visualize data trends and patterns</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>GitHub Analytics</h4>
+                <p>Comprehensive analytics for GitHub users and repositories</p>
+            </div>
+            <div class="footer-section">
+                <h4>Features</h4>
+                <ul>
+                    <li><a href="#user-analytics">User Analytics</a></li>
+                    <li><a href="#repo-analytics">Repository Analytics</a></li>
+                    <li><a href="#trending">Trending Repos</a></li>
+                    <li><a href="#comparisons">Comparisons</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>API</h4>
+                <ul>
+                    <li><a href="/api/analytics/health">API Health</a></li>
+                    <li><a href="/api/test/repositories-status">System Status</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 GitHub Analytics. Built with Spring Boot & GitHub API.</p>
+        </div>
+    </footer>
 </div>
+
+<!-- Scripts -->
+<script src="js/main.js"></script>
 </body>
 </html>
